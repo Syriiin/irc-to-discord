@@ -54,13 +54,14 @@ class IRCClient:
 			#send message to run comm coroutine
 			for pair in self.chan_pairs:
 				if args[0] == pair[0]:
-					if msg.startswith("=status"):
+					if msg.startswith("=status") and len(msg.split()) > 1:
 						name = msg.split(" ", 1)[1].lower()
 						status_msg = ""
 						for member in self.discord_client.get_channel(pair[1]).server.members:
 							if member.name.lower() == name or (member.nick and member.nick.lower() == name):
 								status_msg += "{} is currently {}".format(member.name, str(member.status))
 						self.send_message(args[0], status_msg)
+						continue
 					clean_msg = uniformatter.ircToDiscord(msg, pair[1], self.discord_client)
 					asyncio.run_coroutine_threadsafe(self.discord_client.send_message(discord.Object(id=pair[1]), "**<{}>** {}".format(author, clean_msg)), self.discord_client.loop)
 
