@@ -18,7 +18,7 @@ def discordToIrc(msg):
 
 		return new_str
 
-	formatting_table = [
+	formatting_table = [		#comment lines of this table to disable certain types of formatting relay
 		( (r"\*{3}_{2}",	r"_{2}\*{3}"),	"\x02\x1D\x1F"),	# ***__UNDERLINE BOLD ITALICS__***
 		( (r"_{2}\*{3}",	r"\*{3}_{2}"),	"\x02\x1D\x1F"),	# __***UNDERLINE BOLD ITALICS***__
 		( (r"\*{2}_{2}",	r"_{2}\*{2}"),	"\x02\x1F"),		# **__UNDERLINE BOLD__**
@@ -37,10 +37,6 @@ def discordToIrc(msg):
 
 	for form in formatting_table:
 		msg = replaceFormatting(form[0], form[1], msg)
-
-	msg = msg.replace("\x1D", "")	#comment this line to enable italic text
-#	msg = msg.replace("\x02", "")	#comment this line to enable bold text
-#	msg = msg.replace("\x1F", "")	#comment this line to enable underlined text
 
 	#clean up emotes
 	msg = re.sub(r"<(:\w+:)\d+>", lambda m: m.group(1), msg)
