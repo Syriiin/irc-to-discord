@@ -73,7 +73,10 @@ def msg_process(msg, chan):
 	if len(colour) == 1:
 		colour = "0" + colour
 
-	irc_client.send_message(chan, "<\x03{}{}\x03> {}".format(colour, author, clean_msg))
+	if clean_msg:
+		irc_client.send_message(chan, "<\x03{}{}\x03> {}".format(colour, author, clean_msg))
+	for attachment in msg.attachments:
+		irc_client.send_message(chan, "<\x03{}{}\x03> \x02{}:\x0F {}".format(colour, author, attachment["filename"], attachment["url"]))
 	return
 
 
