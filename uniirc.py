@@ -2,6 +2,7 @@ import socket
 from datetime import datetime
 import asyncio
 import discord
+import re
 
 import uniformatter
 
@@ -62,8 +63,14 @@ class IRCClient:
 								status_msg += "{} is currently {}".format(member.name, str(member.status))
 						self.send_message(args[0], status_msg)
 						continue
+
 					clean_msg = uniformatter.ircToDiscord(msg, pair[1], self.discord_client)
-					asyncio.run_coroutine_threadsafe(self.discord_client.send_message(discord.Object(id=pair[1]), "**<{}>** {}".format(author, clean_msg)), self.discord_client.loop)
+					action_regex = re.match(r"\u0001ACTION (.+)\u0001", clean_msg)	#format /me
+					if action_regex:
+						formatted_msg = "**\* {}** {}".format(author, action_regex.group(1))
+					else:
+						formatted_msg = "**<{}>** {}".format(author, clean_msg)
+					asyncio.run_coroutine_threadsafe(self.discord_client.send_message(discord.Object(id=pair[1]), formatted_msg), self.discord_client.loop)
 
 			if msg == "hello uni":
 				self.s.send("PRIVMSG {} :{}\r\n".format(args[0], "I'm a qt pi").encode())
