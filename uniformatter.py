@@ -64,7 +64,8 @@ def ircToDiscord(msg, channel, discord_client):
 				msg += "\x0F"
 			msg = re.sub(r"{}(.*?)\x0F".format("".join(perm)), lambda m: "{}{}{}".format(form[1], m.group(1), form[1][::-1]), msg)
 
-	msg = msg.replace("\x0f", "")
+	for char in ["\x02", "\x1D", "\x1F", "\x0F"]:
+		msg = msg.replace(char, "")
 
 	mentions = re.findall(r"@(\S+)", msg)
 	if mentions:
