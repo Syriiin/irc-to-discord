@@ -67,8 +67,7 @@ def msg_process(msg, chan):
 	clean_msg = uniformatter.discordToIrc(msg.clean_content)
 
 	#Sending
-	# author = "\x81".join(list(author))
-	author = author[:1] + "\x81" + author[1:]
+	author = author[:1] + u'\u200b' + author[1:]
 	colour = str((sum([ ord(x) for x in author ]) % 12) + 2)		#get seeded random num between 2-13
 	if len(colour) == 1:
 		colour = "0" + colour
