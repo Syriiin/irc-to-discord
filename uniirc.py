@@ -119,6 +119,10 @@ class IRCClient:
 
 
 	def send_message(self, channel, msg):		#send irc message
-		self.s.send("PRIVMSG {} :{}\r\n".format(channel, msg).encode())
+		try:
+			self.s.send("PRIVMSG {} :{}\r\n".format(channel, msg).encode())
+		except BrokenPipeError as e:
+			raise e
+			exit("Error in message size too large. Exiting...")
 		return
 
