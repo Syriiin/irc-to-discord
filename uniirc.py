@@ -122,7 +122,6 @@ class IRCClient:
 		try:
 			self.s.send("PRIVMSG {} :{}\r\n".format(channel, msg).encode())
 		except BrokenPipeError as e:
-			raise e
 			exit("Error in message size too large. Exiting...")
 		return
 
