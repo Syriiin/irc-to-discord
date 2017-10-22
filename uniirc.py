@@ -4,6 +4,8 @@ import asyncio
 import discord
 import re
 
+import _thread
+
 import uniformatter
 
 class IRCClient:
@@ -122,6 +124,7 @@ class IRCClient:
 		try:
 			self.s.send("PRIVMSG {} :{}\r\n".format(channel, msg).encode())
 		except BrokenPipeError as e:
-			exit("Error in message size too large. Exiting...")
+			_thread.interrupt_main()
+			# exit("Error in message size too large. Exiting...")
 		return
 
