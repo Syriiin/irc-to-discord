@@ -5,6 +5,7 @@ IRC to Discord and vise-versa chat relay
 
 - Python 3 ( untested below 3.5 )
 - Discord.py ( `pip install discord.py` )
+- Requests ( `pip install requests` )
 
 ## Setup
 
