@@ -4,6 +4,7 @@ import logging
 import sys
 import time
 import threading
+import json
 
 import uniirc
 import uniformatter
@@ -17,23 +18,13 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-fp_logininfo = open("logininfo.txt", "r")
-logintoken = fp_logininfo.read()				#reading login token from logininfo.txt as of OAuth2 update with BOT accounts
-fp_logininfo.close()
-
-chan_pairs = [	#(irc channel name, discord channel id)
-	("#dota2mods", "250160069549883392"),
-	("#dota2modhelpdesk", "259577266290294786"),
-	("#dota2ai", "259185445131386881"),
-]
-
-voice_list = [
-	"111342297999802368",	# @Syrin
-]
+with open("config.json") as fp:
+	config = json.load(fp)
+chan_pairs = [ (pair["irc_channel"], pair["discord_channel"]) for pair in config["pairs"] ]
 
 client = discord.Client()
 
-irc_client = uniirc.IRCClient(chan_pairs=chan_pairs, discord_client=client)
+irc_client = uniirc.IRCClient(chan_pairs=chan_pairs, config=config["irc"], discord_client=client)
 
 
 @client.event
@@ -103,7 +94,7 @@ irc_thread.start()
 
 try:
 	loop.create_task(irc_checker())
-	loop.run_until_complete(client.login(logintoken))
+	loop.run_until_complete(client.login(config["discord"]["login_token"]))
 	loop.run_until_complete(client.connect())
 except Exception:
 	loop.run_until_complete(client.close())

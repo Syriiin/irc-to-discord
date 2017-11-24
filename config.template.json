@@ -1,0 +1,21 @@
+{
+    "irc": {
+        "server": "",   // Server address (eg. irc.gamesurge.net)
+        "port": 6667,   // Usually 6667
+        "nickname": ""  // Pick a name, any name
+    },
+    "discord": {
+        "login_token": "",  // OAuth2 login token
+        "status_msg": ""    // In discord: "playing ..."
+    },
+    "pairs": [
+        {
+            "irc_channel": "",      // irc channel (eg. #dota2mods)
+            "discord_channel": ""   // discord channel id
+        },
+        {
+            "irc_channel": "",
+            "discord_channel": ""
+        }
+    ]
+}

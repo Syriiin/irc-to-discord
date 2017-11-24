@@ -9,32 +9,26 @@ import _thread
 import uniformatter
 
 class IRCClient:
-	def __init__(self, chan_pairs, discord_client):
+	def __init__(self, chan_pairs, config, discord_client):
 		self.chan_pairs = chan_pairs
 		self.discord_client = discord_client
-		self.s, self.server, self.channels, self.nick = self.irc_connect()
-
-	def irc_connect(self):
-		server = "irc.gamesurge.net"
-		port = 6667
-
+		self.s, self.server, self.nick = self.irc_connect(**config)
+		
+	def irc_connect(self, server, port, nickname):
 		print("Connecting to {}:{}".format(server, port))
-
-		channels = [ pair[0] for pair in self.chan_pairs ]
-		nick = "UniBridge"
 
 		s = socket.socket()
 
 		s.connect((server, port))
-		s.send("NICK {}\r\n".format(nick).encode())
-		s.send("USER {} * * {}\r\n".format(nick, nick).encode())
+		s.send("NICK {}\r\n".format(nickname).encode())
+		s.send("USER {} * * {}\r\n".format(nickname, nickname).encode())
 
 		print("Connected.")
 
-		return s, server, channels, nick
+		return s, server, nickname
 
 	def join_channels(self):
-		for channel in self.channels:
+		for channel in [ pair[0] for pair in self.chan_pairs ]:
 			print("Joining {}".format(channel))
 			self.s.send("JOIN {}\r\n".format(channel).encode())
 		return
