@@ -1,10 +1,8 @@
 import re
 import itertools
+import requests
 
 def discordToIrc(msg):
-	if "\n" in msg:
-		msg = msg.replace("\n", " ")
-
 	def replaceFormatting(form, replacement, string):
 		pattern = r"{}((?:(?!{}).)*?){}".format(form[0], form[0], form[1])
 		str_split = re.split(pattern, string)
@@ -17,6 +15,12 @@ def discordToIrc(msg):
 				new_str += part
 
 		return new_str
+
+	def createHaste(code):
+		responce = requests.post("https://hastebin.com/documents", data=code)
+		key = responce.json()["key"]
+		url = "https://hastebin.com/" + key
+		return url
 
 	formatting_table = [		#comment lines of this table to disable certain types of formatting relay
 		( (r"\*{3}_{2}",	r"_{2}\*{3}"),	"\x02\x1D\x1F"),	# ***__UNDERLINE BOLD ITALICS__***
@@ -31,10 +35,19 @@ def discordToIrc(msg):
 		( (r"_{2}",			r"_{2}"),		"\x1F"),			# __UNDERLINE__
 		( (r"\*{2}",		r"\*{2}"),		"\x02"),			# **BOLD**
 		( (r"\*",			r"\*"),			"\x1D"),			# *ITALICS*
-		( (r"_",			r"_"),			"\x1D")				# _ITALICS_
+		( (r"_",			r"_"),			"\x1D"),			# _ITALICS_
+		( (r"`",			r"`"),			"\x0315")			# `code`
 	]
 
 
+	#replace codeblocks
+	msg = re.sub(r"```(?:\w+\n|\n)?(.+?)```", lambda m: createHaste(m.group(1)), msg, flags=re.S)
+
+	#replace newlines
+	if "\n" in msg:
+		msg = msg.replace("\n", " ")
+
+	#replace formatting
 	for form in formatting_table:
 		msg = replaceFormatting(form[0], form[1], msg)
 
