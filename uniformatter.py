@@ -85,11 +85,14 @@ def ircToDiscord(msg, channel, discord_client):
 
 	mentions = re.findall(r"@(\S+)", msg)
 	if mentions:
-		def mentionGetter(name):
-			name = name.group(1).lower()
+		def mentionGetter(name_match):
+			name = name_match.group(1)
 			for member in discord_client.get_channel(channel).server.members:	#dota2mods serverid
-				if member.name.lower() == name or (member.nick and member.nick.lower() == name):
+				print(member.name)
+				if member.name.lower() == name.lower() or (member.nick and member.nick.lower() == name.lower()):
 					return member.mention
+				else:	# user was not found, just return original text
+					return "@" + name
 		msg = re.sub(r"@(\S+)", mentionGetter, msg)
 
 	return msg

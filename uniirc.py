@@ -67,12 +67,6 @@ class IRCClient:
 					else:
 						formatted_msg = "**<{}>** {}".format(author, clean_msg)
 					asyncio.run_coroutine_threadsafe(self.discord_client.send_message(discord.Object(id=pair[1]), formatted_msg), self.discord_client.loop)
-
-			if msg == "hello uni":
-				self.s.send("PRIVMSG {} :{}\r\n".format(args[0], "I'm a qt pi").encode())
-			# elif msg == "uni dc":
-			# 	self.s.send("QUIT :{}\r\n".format("Because I was told to").encode())
-			# 	exit("I was told to")
 		return
 
 	def split_msg(self, rawmsg):			#interpret irc message
