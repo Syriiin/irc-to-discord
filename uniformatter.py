@@ -4,14 +4,20 @@ import requests
 
 def discordToIrc(msg):
 	def replaceFormatting(form, replacement, string):
-		pattern = r"{}((?:(?!{}).)*?){}".format(form[0], form[0], form[1])
+		start_form = re.escape(form)
+		end_form = re.escape(form[::-1])	# reverse it
+
+		pattern = r"{}((?:(?!{}).)*?){}".format(start_form, start_form, end_form)
 		str_split = re.split(pattern, string)
+
+		if len(str_split) == 1:	# no formatting required
+			return str_split[0]
 
 		new_str = ""
 		for idx, part in enumerate(str_split):
 			if idx % 2 == 1:
 				if re.search(r"https?:\/\/[^ \n]*$", new_str):	#make sure this formatting is not part of a url
-					new_str += "{}{}{}".format(form[0], part, form[1])
+					new_str += "{}{}{}".format(form, part, form[::-1])
 				else:
 					new_str += "{}{}\x0F".format(replacement, part)
 			else:
@@ -26,20 +32,20 @@ def discordToIrc(msg):
 		return url
 
 	formatting_table = [		#comment lines of this table to disable certain types of formatting relay
-		( (r"\*{3}_{2}",	r"_{2}\*{3}"),	"\x02\x1D\x1F"),	# ***__UNDERLINE BOLD ITALICS__***
-		( (r"_{2}\*{3}",	r"\*{3}_{2}"),	"\x02\x1D\x1F"),	# __***UNDERLINE BOLD ITALICS***__
-		( (r"\*{2}_{2}",	r"_{2}\*{2}"),	"\x02\x1F"),		# **__UNDERLINE BOLD__**
-		( (r"_{2}\*{2}",	r"\*{2}_{2}"),	"\x02\x1F"),		# __**UNDERLINE BOLD**__
-		( (r"\*_{2}",		r"_{2}\*"),		"\x1D\x1F"),		# *__UNDERLINE ITALICS__*
-		( (r"_{2}\*",		r"\*_{2}"),		"\x1D\x1F"),		# __*UNDERLINE ITALICS*__
-		( (r"\*{3}",		r"\*{3}"),		"\x02\x1D"),		# ***BOLD ITALICS***
-		( (r"\*{2}_",		r"_\*{2}"),		"\x02\x1D"),		# **_BOLD ITALICS_**
-		( (r"_\*{2}",		r"\*{2}_"),		"\x02\x1D"),		# _**BOLD ITALICS**_
-		( (r"_{2}",			r"_{2}"),		"\x1F"),			# __UNDERLINE__
-		( (r"\*{2}",		r"\*{2}"),		"\x02"),			# **BOLD**
-		( (r"\*",			r"\*"),			"\x1D"),			# *ITALICS*
-		( (r"_",			r"_"),			"\x1D"),			# _ITALICS_
-		( (r"`",			r"`"),			"\x0315")			# `code`
+		( "***__",	"\x02\x1D\x1F"),	# ***__UNDERLINE BOLD ITALICS__***
+		( "__***",	"\x02\x1D\x1F"),	# __***UNDERLINE BOLD ITALICS***__
+		( "**__",	"\x02\x1F"),		# **__UNDERLINE BOLD__**
+		( "__**",	"\x02\x1F"),		# __**UNDERLINE BOLD**__
+		( "*__",	"\x1D\x1F"),		# *__UNDERLINE ITALICS__*
+		( "__*",	"\x1D\x1F"),		# __*UNDERLINE ITALICS*__
+		( "***",	"\x02\x1D"),		# ***BOLD ITALICS***
+		( "**_",	"\x02\x1D"),		# **_BOLD ITALICS_**
+		( "_**",	"\x02\x1D"),		# _**BOLD ITALICS**_
+		( "__",		"\x1F"),			# __UNDERLINE__
+		( "**",		"\x02"),			# **BOLD**
+		( "*",		"\x1D"),			# *ITALICS*
+		( "_",		"\x1D"),			# _ITALICS_
+		( "`",		"\x0315")			# `code`
 	]
 
 
