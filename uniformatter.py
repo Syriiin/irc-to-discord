@@ -10,7 +10,7 @@ def discordToIrc(msg):
 		new_str = ""
 		for idx, part in enumerate(str_split):
 			if idx % 2 == 1:
-				if re.match(r"https?:\/\/[^ \n]*$", new_str):	#make sure this formatting is not part of a url
+				if re.search(r"https?:\/\/[^ \n]*$", new_str):	#make sure this formatting is not part of a url
 					new_str += "{}{}{}".format(form[0], part, form[1])
 				else:
 					new_str += "{}{}\x0F".format(replacement, part)
