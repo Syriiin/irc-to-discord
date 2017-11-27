@@ -32,20 +32,20 @@ def discordToIrc(msg):
 		return url
 
 	formatting_table = [		#comment lines of this table to disable certain types of formatting relay
-		( "***__",	"\x02\x1D\x1F"),	# ***__UNDERLINE BOLD ITALICS__***
-		( "__***",	"\x02\x1D\x1F"),	# __***UNDERLINE BOLD ITALICS***__
-		( "**__",	"\x02\x1F"),		# **__UNDERLINE BOLD__**
-		( "__**",	"\x02\x1F"),		# __**UNDERLINE BOLD**__
-		( "*__",	"\x1D\x1F"),		# *__UNDERLINE ITALICS__*
-		( "__*",	"\x1D\x1F"),		# __*UNDERLINE ITALICS*__
-		( "***",	"\x02\x1D"),		# ***BOLD ITALICS***
-		( "**_",	"\x02\x1D"),		# **_BOLD ITALICS_**
-		( "_**",	"\x02\x1D"),		# _**BOLD ITALICS**_
-		( "__",		"\x1F"),			# __UNDERLINE__
-		( "**",		"\x02"),			# **BOLD**
-		( "*",		"\x1D"),			# *ITALICS*
-		( "_",		"\x1D"),			# _ITALICS_
-		( "`",		"\x0315")			# `code`
+		("***__",	"\x02\x1D\x1F"),	# ***__UNDERLINE BOLD ITALICS__***
+		("__***",	"\x02\x1D\x1F"),	# __***UNDERLINE BOLD ITALICS***__
+		("**__",	"\x02\x1F"),		# **__UNDERLINE BOLD__**
+		("__**",	"\x02\x1F"),		# __**UNDERLINE BOLD**__
+		("*__",		"\x1D\x1F"),		# *__UNDERLINE ITALICS__*
+		("__*",		"\x1D\x1F"),		# __*UNDERLINE ITALICS*__
+		("***",		"\x02\x1D"),		# ***BOLD ITALICS***
+		("**_",		"\x02\x1D"),		# **_BOLD ITALICS_**
+		("_**",		"\x02\x1D"),		# _**BOLD ITALICS**_
+		("__",		"\x1F"),			# __UNDERLINE__
+		("**",		"\x02"),			# **BOLD**
+		("*",		"\x1D"),			# *ITALICS*
+		("_",		"\x1D"),			# _ITALICS_
+		("`",		"\x0315")			# `code`
 	]
 
 
