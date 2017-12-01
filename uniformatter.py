@@ -97,8 +97,8 @@ def ircToDiscord(msg, channel, discord_client):
 				print(member.name)
 				if member.name.lower() == name.lower() or (member.nick and member.nick.lower() == name.lower()):
 					return member.mention
-				else:	# user was not found, just return original text
-					return "@" + name
+			# user was not found, just return original text
+			return "@" + name
 		msg = re.sub(r"@(\S+)", mentionGetter, msg)
 
 	return msg
