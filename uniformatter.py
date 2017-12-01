@@ -94,7 +94,6 @@ def ircToDiscord(msg, channel, discord_client):
 		def mentionGetter(name_match):
 			name = name_match.group(1)
 			for member in discord_client.get_channel(channel).server.members:	#dota2mods serverid
-				print(member.name)
 				if member.name.lower() == name.lower() or (member.nick and member.nick.lower() == name.lower()):
 					return member.mention
 			# user was not found, just return original text
