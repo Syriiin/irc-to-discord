@@ -11,5 +11,5 @@ IRC to Discord and vise-versa chat relay
 
 1. Make a copy of `config.template.json` named `config.json`
 2. Modify contents of `config.json` to your desired settings and delete all comments
-3. Ensure that your `config.json` is not being committed to the repo keep your settings private
+3. Ensure that your `config.json` is not being committed to the repo to keep your auth credentials private
 4. Run `irc-to-discord.py` with python
