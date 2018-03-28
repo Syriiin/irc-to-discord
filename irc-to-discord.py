@@ -30,7 +30,7 @@ irc_client = uniirc.IRCClient(chan_pairs=chan_pairs, config=config["irc"], disco
 @client.event
 @asyncio.coroutine								#notifying console that bot is logged in
 def on_ready():
-	print("Logged into discord as user: 「{}」".format(client.user.name))
+	print("Logged into discord as user: {}".format(client.user.name))
 	default_status = "with your messages"
 	print("Setting default status: {}".format(default_status))
 	yield from client.change_presence(game=discord.Game(name=default_status))
