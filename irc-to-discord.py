@@ -25,12 +25,20 @@ chan_pairs = [ (pair["irc_channel"], pair["discord_channel"]) for pair in config
 client = discord.Client()
 
 irc_client = uniirc.IRCClient(chan_pairs=chan_pairs, config=config["irc"], discord_client=client)
+irc_thread = None
 
 
 @client.event
 @asyncio.coroutine								#notifying console that bot is logged in
 def on_ready():
 	print("Logged into discord as user: {}".format(client.user.name))
+
+	# discord login successful so we can connect to IRC
+	print("Starting IRC...")
+	global irc_thread
+	irc_thread = threading.Thread(target=irc_client.irc_run, daemon=True)
+	irc_thread.start()
+
 	default_status = "with your messages"
 	print("Setting default status: {}".format(default_status))
 	yield from client.change_presence(game=discord.Game(name=default_status))
@@ -75,7 +83,7 @@ def msg_process(msg, chan):
 def irc_checker():
 	yield from client.wait_until_ready()
 	while not client.is_closed:
-		if not irc_thread.is_alive():
+		if irc_thread and not irc_thread.is_alive():
 			exit("IRC client disconnected. Exiting...")
 		yield from asyncio.sleep(10)
 	return
@@ -85,12 +93,6 @@ def irc_checker():
 print("Starting Discord...")
 
 loop = asyncio.get_event_loop()
-
-
-print("Starting IRC...")
-
-irc_thread = threading.Thread(target=irc_client.irc_run, daemon=True)
-irc_thread.start()
 
 try:
 	loop.create_task(irc_checker())

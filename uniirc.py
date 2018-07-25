@@ -10,9 +10,10 @@ import uniformatter
 
 class IRCClient:
 	def __init__(self, chan_pairs, config, discord_client):
+		self.connected = False
 		self.chan_pairs = chan_pairs
+		self.config = config
 		self.discord_client = discord_client
-		self.s, self.server, self.nick = self.irc_connect(**config)
 		
 	def irc_connect(self, server, port, nickname):
 		print("Connecting to {}:{}".format(server, port))
@@ -23,6 +24,7 @@ class IRCClient:
 		s.send("NICK {}\r\n".format(nickname).encode())
 		s.send("USER {} * * {}\r\n".format(nickname, nickname).encode())
 
+		self.connected = True
 		print("Connected.")
 
 		return s, server, nickname
@@ -89,6 +91,9 @@ class IRCClient:
 		return prefix, command, args, msg
 
 	def irc_run(self):		#start main irc loop
+		if not self.connected:
+			self.s, self.server, self.nick = self.irc_connect(**self.config)
+
 		line_buffer = ""
 
 		while True:
