@@ -76,8 +76,8 @@ def ircToDiscord(msg, channel, discord_client):
 		(["\x02", "\x1D"],			"***"),		#bold italics
 		(["\x02"],					"**"),		#bold
 		(["\x1D"],					"*"),		#italics
-		(["\x1F"],					"__")		#underline
-		(["\x11"],					"`")		#code
+		(["\x1F"],					"__"),		#underline
+		(["\x11"],					"`"),		#code
 		(["\x1e"],					"~~")		#strikethrough
 	]
 
