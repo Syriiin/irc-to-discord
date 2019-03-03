@@ -45,7 +45,7 @@ def discordToIrc(msg):
 		("**",		"\x02"),			# **BOLD**
 		("*",		"\x1D"),			# *ITALICS*
 		("_",		"\x1D"),			# _ITALICS_
-		("`",		"\x11")				# `MONOSPACE`
+		("`",		"\x11"),			# `MONOSPACE`
 		("~~",		"\x1e")				# ~~STRIKETHROUGH~~
 	]
 
