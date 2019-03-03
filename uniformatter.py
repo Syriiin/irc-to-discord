@@ -45,7 +45,8 @@ def discordToIrc(msg):
 		("**",		"\x02"),			# **BOLD**
 		("*",		"\x1D"),			# *ITALICS*
 		("_",		"\x1D"),			# _ITALICS_
-		("`",		"\x0315")			# `code`
+		("`",		"\x11")				# `MONOSPACE`
+		("~~",		"\x1e")				# ~~STRIKETHROUGH~~
 	]
 
 
@@ -66,7 +67,7 @@ def discordToIrc(msg):
 	return msg
 
 def ircToDiscord(msg, channel, discord_client):
-	msg = re.sub(r"\x03\d{0,2}", "", msg)
+	msg = re.sub(r"\x03\d{0,2}(?:,\d{0,2})?", "", msg)
 
 	formatting_table = [
 		(["\x02", "\x1D", "\x1F"],	"***__"),	#bold italics underline
@@ -76,6 +77,8 @@ def ircToDiscord(msg, channel, discord_client):
 		(["\x02"],					"**"),		#bold
 		(["\x1D"],					"*"),		#italics
 		(["\x1F"],					"__")		#underline
+		(["\x11"],					"`")		#code
+		(["\x1e"],					"~~")		#strikethrough
 	]
 
 	for form in formatting_table:
