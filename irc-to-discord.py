@@ -27,10 +27,9 @@ client = discord.Client()
 irc_client = uniirc.IRCClient(chan_pairs=chan_pairs, config=config["irc"], discord_client=client)
 irc_thread = None
 
-
+#notifying console that bot is logged in
 @client.event
-@asyncio.coroutine								#notifying console that bot is logged in
-def on_ready():
+async def on_ready():
 	print("Logged into discord as user: {}".format(client.user.name))
 
 	# discord login successful so we can connect to IRC
@@ -41,21 +40,19 @@ def on_ready():
 
 	default_status = "with your messages"
 	print("Setting default status: {}".format(default_status))
-	yield from client.change_presence(activity=discord.Game(name=default_status))
+	await client.change_presence(activity=discord.Game(name=default_status))
 	return
 
-
+#on message recieved, execute this block
 @client.event
-@asyncio.coroutine								#on message recieved, execute this block
-def on_message(msg):
+async def on_message(msg):
 	for chan in chan_pairs:
 		if msg.channel.id == chan[1] and msg.author.id != 263688414296145920:		#is bridge channel and not uni herself
-			yield from msg_process(msg, chan[0])
+			await msg_process(msg, chan[0])
 	return
 
 
-@asyncio.coroutine
-def msg_process(msg, chan):
+async def msg_process(msg, chan):
 	#Nickname check
 	if msg.author.nick:
 		author = msg.author.nick
@@ -81,13 +78,13 @@ def msg_process(msg, chan):
 
 
 
-@asyncio.coroutine			#if irc thread has died then main program exits too
-def irc_checker():
-	yield from client.wait_until_ready()
+#if irc thread has died then main program exits too
+async def irc_checker():
+	await client.wait_until_ready()
 	while not client.is_closed:
 		if irc_thread and not irc_thread.is_alive():
 			exit("IRC client disconnected. Exiting...")
-		yield from asyncio.sleep(10)
+		await asyncio.sleep(10)
 	return
 
 
