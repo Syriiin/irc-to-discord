@@ -11,11 +11,11 @@
     "pairs": [
         {
             "irc_channel": "",      // irc channel (eg. #dota2mods)
-            "discord_channel": ""   // discord channel id
+            "discord_channel": 0   // discord channel id
         },
         {
             "irc_channel": "",
-            "discord_channel": ""
+            "discord_channel": 0
         }
     ]
 }

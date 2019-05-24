@@ -26,8 +26,8 @@ def discordToIrc(msg):
 		return new_str
 
 	def createHaste(code):
-		responce = requests.post("https://hastebin.com/documents", data=code)
-		key = responce.json()["key"]
+		response = requests.post("https://hastebin.com/documents", data=code)
+		key = response.json()["key"]
 		url = "https://hastebin.com/" + key
 		return url
 

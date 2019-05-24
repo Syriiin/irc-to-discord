@@ -68,7 +68,9 @@ class IRCClient:
 						formatted_msg = "**\* {}** {}".format(author, action_regex.group(1))
 					else:
 						formatted_msg = "**<{}>** {}".format(author, clean_msg)
-					asyncio.run_coroutine_threadsafe(self.discord_client.send_message(discord.Object(id=pair[1]), formatted_msg), self.discord_client.loop)
+						
+					discord_channel = self.discord_client.get_channel(pair[1])
+					asyncio.run_coroutine_threadsafe(discord_channel.send(formatted_msg), self.discord_client.loop)
 		return
 
 	def split_msg(self, rawmsg):			#interpret irc message

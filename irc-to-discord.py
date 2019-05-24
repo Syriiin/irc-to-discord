@@ -41,7 +41,7 @@ def on_ready():
 
 	default_status = "with your messages"
 	print("Setting default status: {}".format(default_status))
-	yield from client.change_presence(game=discord.Game(name=default_status))
+	yield from client.change_presence(activity=discord.Game(name=default_status))
 	return
 
 
@@ -49,7 +49,7 @@ def on_ready():
 @asyncio.coroutine								#on message recieved, execute this block
 def on_message(msg):
 	for chan in chan_pairs:
-		if msg.channel.id == chan[1] and msg.author.id != "263688414296145920":		#is bridge channel and not uni herself
+		if msg.channel.id == chan[1] and msg.author.id != 263688414296145920:		#is bridge channel and not uni herself
 			yield from msg_process(msg, chan[0])
 	return
 
