@@ -48,6 +48,8 @@ class IRCClient:
             self.writer.write("PONG {}\r\n".format(message).encode())
         elif command == "PRIVMSG":
             author = prefix.split("!")[0]
+            if author in self.config["ignoreList"]:
+                return
 
             # send message to run comm coroutine
             pair = next((pair for pair in self.channel_pairs if pair.irc_channel == args[0]), None)
@@ -64,7 +66,10 @@ class IRCClient:
                 if action_regex:
                     complete_message = "**\* {}** {}".format(author, action_regex.group(1))
                 else:
-                    complete_message = "**<{}>** {}".format(author, formatted_message)
+                    if author not in self.config["passthroughList"]:
+                        complete_message = "**<{}>** {}".format(author, formatted_message)
+                    else:
+                        complete_message = formatted_message
                     
                 discord_channel = self.discord_client.get_channel(pair.discord_channel_id)
                 await discord_channel.send(complete_message)

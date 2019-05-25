@@ -22,7 +22,7 @@ class Bridge(discord.Client):
         await self.change_presence(activity=discord.Game(name=self.config["status_msg"]))
     
     async def on_message(self, message):
-        if message.author.id != self.user.id:
+        if message.author.id not in self.config["ignoreList"] + [self.user.id]:
             pair = next((pair for pair in self.channel_pairs if pair.discord_channel_id == message.channel.id), None)
             if pair:
                 await self.process_message(message, pair)
@@ -31,19 +31,25 @@ class Bridge(discord.Client):
         # Get author name
         author = message.author.nick or message.author.name
 
-        # Format message
-        formatted_message = await formatter.discordToIrc(message.clean_content)
+        if message.content:
+            # Format message
+            formatted_message = await formatter.discordToIrc(message.clean_content)
 
-        # Format author
-        author = author[:1] + u"\u200b" + author[1:]
-        colour = str(sum(ord(x) for x in author) % 12 + 2)    # seeded random num between 2-13
-        if len(colour) == 1:
-            # zero pad to be 2 digits
-            colour = "0" + colour
+            # Check for passthrough
+            if message.author.id not in self.config["passthroughList"]:
+                # Format author
+                author = author[:1] + u"\u200b" + author[1:]
+                colour = str(sum(ord(x) for x in author) % 12 + 2)    # seeded random num between 2-13
+                if len(colour) == 1:
+                    # zero pad to be 2 digits
+                    colour = "0" + colour
+                complete_message = "<\x03{}{}\x03> {}".format(colour, author, formatted_message)
+            else:
+                complete_message = formatted_message
 
-        # Relay message
-        if formatted_message:
-            await self.irc_client.send_message(channel_pair.irc_channel, "<\x03{}{}\x03> {}".format(colour, author, formatted_message))
+            # Relay message
+            await self.irc_client.send_message(channel_pair.irc_channel, complete_message)
+        
         for attachment in message.attachments:
             await self.irc_client.send_message(chan, "<\x03{}{}\x03> \x02{}:\x0F {}".format(colour, author, attachment.filename, attachment.url))
         for embed in message.embeds:
