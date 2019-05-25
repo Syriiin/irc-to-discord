@@ -26,7 +26,10 @@ async def discordToIrc(message):
         return new_str
 
     async def createHaste(code):
-        response = await requests_async.post("https://hastebin.com/documents", data=code)
+        try:
+            response = await requests_async.post("https://hastebin.com/documents", data=code, timeout=15)
+        except requests_async.exceptions.RequestException as e:
+            return "<Error creating hastebin>"
         key = response.json()["key"]
         url = "https://hastebin.com/" + key
         return url
