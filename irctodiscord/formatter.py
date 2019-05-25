@@ -25,9 +25,9 @@ async def discordToIrc(message):
 
         return new_str
 
-    async def createHaste(code):
+    async def createHaste(text):
         try:
-            response = await requests_async.post("https://hastebin.com/documents", data=code, timeout=15)
+            response = await requests_async.post("https://hastebin.com/documents", data=text, timeout=15)
         except requests_async.exceptions.RequestException as e:
             return "<Error creating hastebin>"
         key = response.json()["key"]
@@ -66,6 +66,11 @@ async def discordToIrc(message):
 
     #clean up emotes
     message = re.sub(r"<(:\w+:)\d+>", lambda m: m.group(1), message)
+
+    # check message length and truncate + hastebin if needed
+    if len(message) > 400:  # max length is 512, so lets leave 112 bytes for the preamble
+        # can improve this later by estimating the message length from server -> client (eg. https://github.com/RenolY2/Renol-IRC/blob/8a906402e08e9ae6cce02b61ba728d14b31b578b/commandHandler.py#L123-L141)
+        message = message[:350] + "\x0F... {}".format(await createHaste(message))
 
     return message
 

@@ -59,15 +59,15 @@ class IRCClient:
                     status_message = "{} is currently {}".format(member.name, str(member.status))
                     await self.send_message(args[0], status_message)
 
-                clean_message = await formatter.ircToDiscord(message, pair.discord_channel_id, self.discord_client)
-                action_regex = re.match(r"\u0001ACTION (.+)\u0001", clean_message)  # format /me
+                formatted_message = await formatter.ircToDiscord(message, pair.discord_channel_id, self.discord_client)
+                action_regex = re.match(r"\u0001ACTION (.+)\u0001", formatted_message)  # format /me
                 if action_regex:
-                    formatted_message = "**\* {}** {}".format(author, action_regex.group(1))
+                    complete_message = "**\* {}** {}".format(author, action_regex.group(1))
                 else:
-                    formatted_message = "**<{}>** {}".format(author, clean_message)
+                    complete_message = "**<{}>** {}".format(author, formatted_message)
                     
                 discord_channel = self.discord_client.get_channel(pair.discord_channel_id)
-                await discord_channel.send(formatted_message)
+                await discord_channel.send(complete_message)
 
     async def join_channels(self):
         for pair in self.channel_pairs:
