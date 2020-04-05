@@ -16,9 +16,11 @@ class Bridge(discord.Client):
 
     def run(self):
         self.irc_client_task = self.loop.create_task(self.irc_client.start())
+        print("Starting discord client...")
         super().run(self.config["loginToken"])
 
     async def on_ready(self):
+        print("Connected to discord.")
         await self.change_presence(activity=discord.Game(name=self.config["statusMessage"]))
     
     async def on_message(self, message):

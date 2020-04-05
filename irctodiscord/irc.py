@@ -76,15 +76,18 @@ class IRCClient:
 
     async def join_channels(self):
         for pair in self.channel_pairs:
+            print(f"Joining {pair.irc_channel}...")
             self.writer.write("JOIN {}\r\n".format(pair.irc_channel).encode())
 
     async def connect(self):
+        print("Connecting to IRC...")
         self.reader, self.writer = await asyncio.open_connection(self.config["server"], self.config["port"], loop=self.discord_client.loop)
         self.writer.write("NICK {}\r\n".format(self.config["nickname"]).encode())
         self.writer.write("USER {} * * {}\r\n".format(self.config["nickname"], self.config["nickname"]).encode())
         self.connected = True
 
     async def start(self):
+        print("Starting IRC client...")
         if not self.connected:
             await self.connect()
         
