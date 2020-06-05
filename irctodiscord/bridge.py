@@ -31,7 +31,11 @@ class Bridge(discord.Client):
 
     async def process_message(self, message, channel_pair):
         # Get author name
-        author = message.author.nick or message.author.name
+        try:
+            author = message.author.nick or message.author.name
+        except AttributeError:
+            # possible for system messages or PMs (not relevant to this bot)
+            author = message.author.name
 
         # Format author
         author = author[:1] + u"\u200b" + author[1:]
