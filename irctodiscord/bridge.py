@@ -37,6 +37,11 @@ class Bridge(discord.Client):
             # possible for system messages or PMs (not relevant to this bot)
             author = message.author.name
 
+        if message.type == discord.MessageType.default:
+            content = message.clean_content
+        else:
+            content = message.system_content
+
         # Format author
         author = author[:1] + u"\u200b" + author[1:]
         colour = str(sum(ord(x) for x in author) % 12 + 2)    # seeded random num between 2-13
@@ -44,20 +49,22 @@ class Bridge(discord.Client):
             # zero pad to be 2 digits
             colour = "0" + colour
 
-        if message.content:
+        if content:
             # Format message
-            formatted_message = await formatter.discordToIrc(message.clean_content)
+            formatted_message = await formatter.discordToIrc(content)
 
             # Check for passthrough
-            if message.author.id not in self.config["passthroughList"]:
-                complete_message = "<\x03{}{}\x03> {}".format(colour, author, formatted_message)
-            else:
+            if message.author.id in self.config["passthroughList"]:
                 complete_message = formatted_message
+            elif message.type != discord.MessageType.default:
+                complete_message = f"\x0314SYSTEM\x03: {formatted_message}"
+            else:
+                complete_message = f"<\x03{colour}{author}\x03> {formatted_message}"
 
             # Relay message
             await self.irc_client.send_message(channel_pair.irc_channel, complete_message)
         
         for attachment in message.attachments:
-            await self.irc_client.send_message(channel_pair.irc_channel, "<\x03{}{}\x03> \x02{}:\x0F {}".format(colour, author, attachment.filename, attachment.url))
+            await self.irc_client.send_message(channel_pair.irc_channel, f"<\x03{colour}{author}\x03> \x02{attachment.filename}:\x0F {attachment.url}")
         for embed in message.embeds:
-            await self.irc_client.send_message(channel_pair.irc_channel, "<\x03{}{}\x03> \x02{}:\x0F {}".format(colour, author, embed.title, embed.url))
+            await self.irc_client.send_message(channel_pair.irc_channel, f"<\x03{colour}{author}\x03> \x02{embed.title}:\x0F {embed.url}")
