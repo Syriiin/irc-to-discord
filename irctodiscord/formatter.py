@@ -54,7 +54,12 @@ async def discordToIrc(message):
 
     #replace codeblocks
     for match in re.finditer(r"```(?:\w+\n|\n)?(.+?)```", message, flags=re.S):
-        message = message.replace(match.group(0), await createHaste(match.group(1)))
+        code = match.group(1).strip("\n")
+        if code.count("\n") > 0:
+            haste_link = await createHaste(code)
+            message = message.replace(match.group(0), haste_link)
+        else:
+            message = message.replace(match.group(0), f"\x11{code}\x11")
 
     #replace newlines
     if "\n" in message:
