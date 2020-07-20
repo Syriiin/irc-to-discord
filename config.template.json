@@ -2,20 +2,32 @@
     "irc": {
         "server": "",   // Server address (eg. irc.gamesurge.net)
         "port": 6667,   // Usually 6667
-        "nickname": ""  // Pick a name, any name
+        "nickname": "", // Pick a name, any name
+        "ignoreList": [ // List of irc names to ignore messages from
+            
+        ],
+        "passthroughList": [    // List of irc names to hide the author of
+            
+        ]
     },
     "discord": {
-        "login_token": "",  // OAuth2 login token
-        "status_msg": ""    // In discord: "playing ..."
+        "loginToken": "",  // OAuth2 login token
+        "statusMessage": "",   // In discord: "playing ..."
+        "ignoreList": [     // List of discord user ids to ignore messages from
+            
+        ],
+        "passthroughList": [    // List of discord user ids to hide the author of
+            
+        ]
     },
     "pairs": [
         {
-            "irc_channel": "",      // irc channel (eg. #dota2mods)
-            "discord_channel": 0   // discord channel id
+            "ircChannel": "",      // irc channel (eg. #dota2mods)
+            "discordChannel": 0    // discord channel id
         },
         {
-            "irc_channel": "",
-            "discord_channel": 0
+            "ircChannel": "",
+            "discordChannel": 0
         }
     ]
 }
