@@ -82,6 +82,8 @@ class IRCClient:
     async def connect(self):
         print("Connecting to IRC...")
         self.reader, self.writer = await asyncio.open_connection(self.config["server"], self.config["port"], loop=self.discord_client.loop)
+        if self.config["password"] != "":
+            self.writer.write("PASS {}\r\n".format(self.config["password"]).encode())
         self.writer.write("NICK {}\r\n".format(self.config["nickname"]).encode())
         self.writer.write("USER {} * * {}\r\n".format(self.config["nickname"], self.config["nickname"]).encode())
         self.connected = True
