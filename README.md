@@ -3,9 +3,7 @@ IRC to Discord and vise-versa chat relay
 
 ## Requirements
 
-- Python 3 (untested below 3.7)
-- Discord.py (untested below 1.1.1)
-- Async-requests
+- Python 3
 
 ## Setup
 

@@ -1,6 +1,6 @@
 import re
 import itertools
-import requests_async
+import httpx
 
 async def discordToIrc(message):
     def replaceFormatting(form, replacement, string):
@@ -27,8 +27,9 @@ async def discordToIrc(message):
 
     async def createHaste(text):
         try:
-            response = await requests_async.post("https://hastebin.com/documents", data=text, timeout=15)
-        except requests_async.exceptions.RequestException as e:
+            async with httpx.AsyncClient() as client:
+                response = await client.post("https://hastebin.com/documents", data=text, timeout=15)
+        except httpx.HTTPError as e:
             return "<Error creating hastebin>"
         key = response.json()["key"]
         url = "https://hastebin.com/" + key
