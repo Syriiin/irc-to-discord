@@ -9,7 +9,8 @@
         ],
         "passthroughList": [    // List of irc names to hide the author of
             
-        ]
+        ],
+        "parseFormatting": true // Whether parse formatting from IRC messages or raw message to discord
     },
     "discord": {
         "loginToken": "",  // OAuth2 login token
@@ -19,7 +20,8 @@
         ],
         "passthroughList": [    // List of discord user ids to hide the author of
             
-        ]
+        ],
+        "parseFormatting": true // Whether parse formatting from discord messages or raw message to IRC
     },
     "pairs": [
         {

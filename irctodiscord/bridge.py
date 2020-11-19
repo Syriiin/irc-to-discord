@@ -51,7 +51,7 @@ class Bridge(discord.Client):
 
         if content:
             # Format message
-            formatted_message = await formatter.discordToIrc(content)
+            formatted_message = await formatter.discordToIrc(content) if self.config["parseFormatting"] else content
 
             # Check for passthrough
             if message.author.id in self.config["passthroughList"]:
