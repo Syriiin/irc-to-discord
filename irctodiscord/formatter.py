@@ -3,7 +3,7 @@ import itertools
 import httpx
 import json
 
-async def discordToIrc(message):
+async def discordToIrc(message, parse_formatting=True):
     def replaceFormatting(form, replacement, string):
         start_form = re.escape(form)
         end_form = re.escape(form[::-1])    # reverse it
@@ -71,8 +71,9 @@ async def discordToIrc(message):
         message = message.replace("\n", " ")
 
     #replace formatting
-    for form in formatting_table:
-        message = replaceFormatting(form[0], form[1], message)
+    if parse_formatting:
+        for form in formatting_table:
+            message = replaceFormatting(form[0], form[1], message)
 
     #clean up emotes
     message = re.sub(r"<(:\w+:)\d+>", lambda m: m.group(1), message)
@@ -84,28 +85,29 @@ async def discordToIrc(message):
 
     return message
 
-async def ircToDiscord(message, discord_channel_id, discord_client):
+async def ircToDiscord(message, discord_channel_id, discord_client, parse_formatting=True):
     message = re.sub(r"\x03\d{0,2}(?:,\d{0,2})?", "", message)
 
-    formatting_table = [
-        (["\x02", "\x1D", "\x1F"],  "***__"),   #bold italics underline
-        (["\x1D", "\x1F"],  "*__"), #italics underline
-        (["\x02", "\x1F"],  "**_"), #bold underline
-        (["\x02", "\x1D"],  "***"), #bold italics
-        (["\x02"],  "**"),  #bold
-        (["\x1D"],  "*"),   #italics
-        (["\x1F"],  "__"),  #underline
-        (["\x11"],  "`"),   #code
-        (["\x1e"],  "~~")   #strikethrough
-    ]
+    if parse_formatting:
+        formatting_table = [
+            (["\x02", "\x1D", "\x1F"],  "***__"),   #bold italics underline
+            (["\x1D", "\x1F"],  "*__"), #italics underline
+            (["\x02", "\x1F"],  "**_"), #bold underline
+            (["\x02", "\x1D"],  "***"), #bold italics
+            (["\x02"],  "**"),  #bold
+            (["\x1D"],  "*"),   #italics
+            (["\x1F"],  "__"),  #underline
+            (["\x11"],  "`"),   #code
+            (["\x1e"],  "~~")   #strikethrough
+        ]
 
-    for form in formatting_table:
-        #check for matches for all permutation of the list
-        perms = itertools.permutations(form[0])
-        for perm in perms:
-            if "\x0F" not in message:
-                message += "\x0F"
-            message = re.sub(r"{}(.*?)\x0F".format("".join(perm)), lambda m: "{}{}{}".format(form[1], m.group(1), form[1][::-1]), message)
+        for form in formatting_table:
+            #check for matches for all permutation of the list
+            perms = itertools.permutations(form[0])
+            for perm in perms:
+                if "\x0F" not in message:
+                    message += "\x0F"
+                message = re.sub(r"{}(.*?)\x0F".format("".join(perm)), lambda m: "{}{}{}".format(form[1], m.group(1), form[1][::-1]), message)
 
     for char in ["\x02", "\x1D", "\x1F", "\x0F"]:
         message = message.replace(char, "")

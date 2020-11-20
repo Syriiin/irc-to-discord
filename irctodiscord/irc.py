@@ -61,7 +61,7 @@ class IRCClient:
                     status_message = "{} is currently {}".format(member.name, str(member.status))
                     await self.send_message(args[0], status_message)
 
-                formatted_message = await formatter.ircToDiscord(message, pair.discord_channel_id, self.discord_client) if self.config["parseFormatting"] else message
+                formatted_message = await formatter.ircToDiscord(message, pair.discord_channel_id, self.discord_client, self.config["parseFormatting"])
                 action_regex = re.match(r"\u0001ACTION (.+)\u0001", formatted_message)  # format /me
                 if action_regex:
                     complete_message = "**\* {}** {}".format(author, action_regex.group(1))
