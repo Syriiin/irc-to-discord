@@ -67,4 +67,8 @@ class Bridge(discord.Client):
         for attachment in message.attachments:
             await self.irc_client.send_message(channel_pair.irc_channel, f"<\x03{colour}{author}\x03> \x02{attachment.filename}:\x0F {attachment.url}")
         for embed in message.embeds:
-            await self.irc_client.send_message(channel_pair.irc_channel, f"<\x03{colour}{author}\x03> \x02{embed.title}:\x0F {embed.url}")
+            if embed.url not in content:
+                if embed.title is not discord.Embed.Empty:
+                    await self.irc_client.send_message(channel_pair.irc_channel, f"<\x03{colour}{author}\x03> \x02{embed.title}:\x0F {embed.url}")
+                else:
+                    await self.irc_client.send_message(channel_pair.irc_channel, f"<\x03{colour}{author}\x03> {embed.url}")
