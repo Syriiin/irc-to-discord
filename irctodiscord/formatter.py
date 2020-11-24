@@ -98,7 +98,7 @@ async def ircToDiscord(message, discord_channel_id, discord_client, parse_format
             (["\x1D"],  "*"),   #italics
             (["\x1F"],  "__"),  #underline
             (["\x11"],  "`"),   #code
-            (["\x1e"],  "~~")   #strikethrough
+            (["\x1E"],  "~~")   #strikethrough
         ]
 
         for form in formatting_table:
@@ -109,7 +109,7 @@ async def ircToDiscord(message, discord_channel_id, discord_client, parse_format
                     message += "\x0F"
                 message = re.sub(r"{}(.*?)\x0F".format("".join(perm)), lambda m: "{}{}{}".format(form[1], m.group(1), form[1][::-1]), message)
 
-    for char in ["\x02", "\x1D", "\x1F", "\x0F"]:
+    for char in ["\x02", "\x1D", "\x1F", "\x11", "\x1E", "\x0F"]:
         message = message.replace(char, "")
 
     mentions = re.findall(r"@(\S+)", message)
