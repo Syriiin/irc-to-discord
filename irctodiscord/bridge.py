@@ -45,11 +45,14 @@ class Bridge(discord.Client):
             content = message.system_content
 
         # Format author
-        def format_name(name):
+        def format_name(name, escape_mention=True):
             colour = str(sum(ord(x) for x in name) % 12 + 2)    # seeded random num between 2-13
             if len(colour) == 1:
                 colour = "0" + colour   # zero pad to be 2 digits
-            return f"\x03{colour}{name[:1]}\u200b{name[1:]}\x03"
+            formatted_name = name
+            if escape_mention:
+                formatted_name = f"{name[:1]}\u200b{name[1:]}"
+            return f"\x03{colour}{formatted_name}\x03"
 
         # Get name of user being replied to (if any)
         reply_name = None
@@ -83,7 +86,7 @@ class Bridge(discord.Client):
             elif message.type != discord.MessageType.default:
                 header = f"\x0314SYSTEM\x03: "
             elif reply_name is not None:
-                header = f"<{format_name(author)} -> {format_name(reply_name)}> "
+                header = f"<{format_name(author)} \u2192 {format_name(reply_name, False)}> "
             else:
                 header = f"<{format_name(author)}> "
 
