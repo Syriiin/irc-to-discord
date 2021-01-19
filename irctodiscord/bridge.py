@@ -11,7 +11,9 @@ ChannelPair = namedtuple("ChannelPair", ["irc_channel", "discord_channel_id"])
 class Bridge(discord.Client):
     def __init__(self, config, *args, **kwargs):
         allowed_mentions = discord.AllowedMentions(everyone=False, users=True, roles=False, replied_user=True)
-        super().__init__(*args, **kwargs, allowed_mentions=allowed_mentions)
+        intents = discord.Intents.default()
+        intents.members = True
+        super().__init__(*args, **kwargs, allowed_mentions=allowed_mentions, intents=intents)
         self.config = config["discord"]
         self.channel_pairs = [ChannelPair(pair["ircChannel"], pair["discordChannel"]) for pair in config["pairs"]]
         self.irc_client = IRCClient(self, config["irc"], self.channel_pairs)
