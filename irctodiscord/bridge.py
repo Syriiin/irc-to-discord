@@ -1,4 +1,5 @@
 from collections import namedtuple
+import re
 
 import discord
 
@@ -43,23 +44,49 @@ class Bridge(discord.Client):
             content = message.system_content
 
         # Format author
-        author = author[:1] + u"\u200b" + author[1:]
-        colour = str(sum(ord(x) for x in author) % 12 + 2)    # seeded random num between 2-13
-        if len(colour) == 1:
-            # zero pad to be 2 digits
-            colour = "0" + colour
+        def format_name(name):
+            colour = str(sum(ord(x) for x in name) % 12 + 2)    # seeded random num between 2-13
+            if len(colour) == 1:
+                colour = "0" + colour   # zero pad to be 2 digits
+            return f"\x03{colour}{name[:1]}\u200b{name[1:]}\x03"
 
+        # Get name of user being replied to (if any)
+        reply_name = None
+        if message.reference and message.type == discord.MessageType.default:
+            replied_message = None
+            if message.reference.cached_message:
+                replied_message = message.reference.cached_message
+            elif isinstance(message.reference.resolved, discord.Message):
+                replied_message = message.reference.resolved
+
+            if replied_message is not None:
+                if replied_message.author == self.user:
+                    # parse bridge formatted name eg. "**<SpiderNight>**: ..."
+                    match = re.match(r"\*\*<([\S]+)>\*\*", replied_message.content)
+                    if match:
+                        reply_name = match.group(1)
+                else:
+                    try:
+                        reply_name = replied_message.author.nick or replied_message.author.name
+                    except AttributeError:
+                        # occurs when the message wasn't in the cache and so author is a User rather than a Member
+                        reply_name = replied_message.author.name
+                        
         if content:
             # Format message
             formatted_message = await formatter.discordToIrc(content, self.config["parseFormatting"])
 
             # Check for passthrough
             if message.author.id in self.config["passthroughList"]:
-                complete_message = formatted_message
+                header = ""
             elif message.type != discord.MessageType.default:
-                complete_message = f"\x0314SYSTEM\x03: {formatted_message}"
+                header = f"\x0314SYSTEM\x03: "
+            elif reply_name is not None:
+                header = f"<{format_name(author)} -> {format_name(reply_name)}> "
             else:
-                complete_message = f"<\x03{colour}{author}\x03> {formatted_message}"
+                header = f"<{format_name(author)}> "
+
+            complete_message = f"{header}{formatted_message}"
 
             # Relay message
             await self.irc_client.send_message(channel_pair.irc_channel, complete_message)
