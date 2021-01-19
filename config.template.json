@@ -4,6 +4,7 @@
         "port": 6667,   // Usually 6667
         "nickname": "", // Pick a name, any name
         "password": "", // Hope you remember this
+        "enableSsl": false,  // Whether to use an ssl connection or not
         "ignoreList": [ // List of irc names to ignore messages from
             
         ],

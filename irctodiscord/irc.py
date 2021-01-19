@@ -1,6 +1,5 @@
 import asyncio
 import re
-import socket
 
 from irctodiscord import formatter
 
@@ -81,7 +80,7 @@ class IRCClient:
 
     async def connect(self):
         print("Connecting to IRC...")
-        self.reader, self.writer = await asyncio.open_connection(self.config["server"], self.config["port"], loop=self.discord_client.loop)
+        self.reader, self.writer = await asyncio.open_connection(self.config["server"], self.config["port"], loop=self.discord_client.loop, ssl=self.config["enableSsl"])
         if self.config["password"] != "":
             self.writer.write("PASS {}\r\n".format(self.config["password"]).encode())
         self.writer.write("NICK {}\r\n".format(self.config["nickname"]).encode())
