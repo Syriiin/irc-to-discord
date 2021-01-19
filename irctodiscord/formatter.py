@@ -116,8 +116,8 @@ async def ircToDiscord(message, discord_channel_id, discord_client, parse_format
     if mentions:
         def mentionGetter(name_match):
             name = name_match.group(1)
+            lower_name = name.lower()
             for member in discord_client.get_channel(discord_channel_id).guild.members:
-                lower_name = name.lower()
                 if member.name.lower() == lower_name or (member.nick and member.nick.lower() == lower_name):
                     return member.mention
             # user was not found, just return original text
