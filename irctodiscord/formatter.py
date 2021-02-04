@@ -2,6 +2,7 @@ import re
 import itertools
 import httpx
 import json
+import asyncio
 
 async def discordToIrc(message, parse_formatting=True):
     def replaceFormatting(form, replacement, string):
@@ -26,18 +27,29 @@ async def discordToIrc(message, parse_formatting=True):
 
         return new_str
 
+    async def createTermbin(text):
+        reader, writer = await asyncio.wait_for(asyncio.open_connection("termbin.com", 9999), timeout=5)
+        writer.write(text.encode())
+        response = await reader.readline()
+        writer.close()
+        url = response.decode().strip()
+        return url
+
     async def createHaste(text):
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post("https://hastebin.com/documents", data=text, timeout=15)
-        except httpx.HTTPError as e:
-            return "<Error creating hastebin>"
-        try:
-            key = response.json()["key"]
-        except (json.decoded.JSONDecodeError, KeyError) as e:
-            return "<Error creating hastebin>"
+        async with httpx.AsyncClient() as client:
+            response = await client.post("https://hastebin.com/documents", data=text, timeout=5)
+        key = response.json()["key"]
         url = "https://hastebin.com/" + key
         return url
+
+    async def createTextDump(text):
+        try:
+            return await createHaste(text)
+        except (httpx.HTTPError, json.JSONDecodeError, KeyError):
+            try:
+                return await createTermbin(text)
+            except asyncio.TimeoutError:
+                return "<Error creating text dump>"
 
     formatting_table = [    #comment lines of this table to disable certain types of formatting relay
         ("***__",   "\x02\x1D\x1F"),    # ***__UNDERLINE BOLD ITALICS__***
@@ -61,8 +73,8 @@ async def discordToIrc(message, parse_formatting=True):
     for match in re.finditer(r"```(?:\w+\n|\n)?(.+?)```", message, flags=re.S):
         code = match.group(1).strip("\n")
         if code.count("\n") > 0:
-            haste_link = await createHaste(code)
-            message = message.replace(match.group(0), haste_link)
+            dump_link = await createTextDump(code)
+            message = message.replace(match.group(0), dump_link)
         else:
             message = message.replace(match.group(0), f"\x11{code}\x11")
 
