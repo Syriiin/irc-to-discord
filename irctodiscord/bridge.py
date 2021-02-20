@@ -80,7 +80,7 @@ class Bridge(discord.Client):
                         
         if content:
             # Format message
-            formatted_message = await formatter.discordToIrc(content, self.config["parseFormatting"])
+            formatted_message = await formatter.discordToIrc(content, author, str(message.author.avatar_url), self.config["parseFormatting"], self.config["urlShortener"])
 
             # Check for passthrough
             if message.author.id in self.config["passthroughList"]:

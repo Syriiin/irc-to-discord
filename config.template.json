@@ -22,7 +22,11 @@
         "passthroughList": [    // List of discord user ids to hide the author of
             
         ],
-        "parseFormatting": true // Whether parse formatting from discord messages or raw message to IRC
+        "parseFormatting": true,    // Whether parse formatting from discord messages or raw message to IRC
+        "urlShortener": {   // settings for url shortener, can be null
+            "service": "",  // url shortener service to use
+            "token": "" // authentication token
+        }
     },
     "pairs": [
         {

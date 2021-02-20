@@ -3,8 +3,13 @@ import itertools
 import httpx
 import json
 import asyncio
+import base64
+import traceback
 
-async def discordToIrc(message, parse_formatting=True):
+class MalformedConfig(Exception):
+    pass
+
+async def discordToIrc(message, author, author_avatar_url, parse_formatting=True, url_shortener_config=None):
     def replaceFormatting(form, replacement, string):
         start_form = re.escape(form)
         end_form = re.escape(form[::-1])    # reverse it
@@ -51,6 +56,40 @@ async def discordToIrc(message, parse_formatting=True):
             except asyncio.TimeoutError:
                 return "<Error creating text dump>"
 
+    async def createDiscohookUrl(message, author, author_avatar_url, url_shortener_config):
+        discohook_data = {
+            "messages": [
+                {
+                    "data": {
+                        "content": message,
+                        "username": author,
+                        "avatar_url": author_avatar_url
+                    },
+                    "badge": None
+                }
+            ]
+        }
+        base64_string = base64.urlsafe_b64encode(json.dumps(discohook_data).encode()).decode()
+        discohook_url = f"https://discohook.org/viewer?data={base64_string}"
+        
+        if "service" not in url_shortener_config:
+            raise MalformedConfig("Missing 'service' property in url shortener config")
+
+        if url_shortener_config["service"] == "r.xpaw.me":
+            if "token" not in url_shortener_config:
+                raise MalformedConfig(f"Missing config property 'token' of url shortener service 'r.xpaw.me'")
+            async with httpx.AsyncClient() as client:
+                form_data = {
+                    "secret": url_shortener_config["token"],
+                    "url": discohook_url
+                }
+                response = await client.post("https://r.xpaw.me/@create", data=form_data, timeout=5)
+                if response.status_code != 201:
+                    raise MalformedConfig(f"Something went wrong in request to url shortener service 'r.paw.me': HTTP {response.status_code}")
+                return response.read().decode()
+        else:
+            raise MalformedConfig(f"The url shortener service '{url_shortener_config['service']}' is not supported")
+
     formatting_table = [    #comment lines of this table to disable certain types of formatting relay
         ("***__",   "\x02\x1D\x1F"),    # ***__UNDERLINE BOLD ITALICS__***
         ("__***",   "\x02\x1D\x1F"),    # __***UNDERLINE BOLD ITALICS***__
@@ -68,6 +107,13 @@ async def discordToIrc(message, parse_formatting=True):
         ("`",   "\x11"),    # `MONOSPACE`
         ("~~",  "\x1e") # ~~STRIKETHROUGH~~
     ]
+
+    # if we have codeblocks and a shortener available, just try to throw the message into discohook
+    if url_shortener_config is not None and re.search(r"```(.+?)```", message, flags=re.S) is not None:
+        try:
+            return await createDiscohookUrl(message, author, author_avatar_url, url_shortener_config)
+        except (httpx.HTTPError, MalformedConfig) as error:
+            traceback.print_exc()
 
     #replace codeblocks
     for match in re.finditer(r"```(?:\w+\n|\n)?(.+?)```", message, flags=re.S):
@@ -93,7 +139,12 @@ async def discordToIrc(message, parse_formatting=True):
     # check message length and truncate + hastebin if needed
     if len(message) > 400:  # max length is 512, so lets leave 112 bytes for the preamble
         # can improve this later by estimating the message length from server -> client (eg. https://github.com/RenolY2/Renol-IRC/blob/8a906402e08e9ae6cce02b61ba728d14b31b578b/commandHandler.py#L123-L141)
-        message = message[:350] + "\x0F... {}".format(await createHaste(message))
+        if url_shortener_config is not None:
+            try:
+                return await createDiscohookUrl(message, author, author_avatar_url, url_shortener_config)
+            except (httpx.HTTPError, MalformedConfig) as error:
+                traceback.print_exc()
+        message = message[:350] + "\x0F... {}".format(await createTextDump(message))
 
     return message
 
