@@ -32,6 +32,24 @@ async def discordToIrc(message, author, author_avatar_url, parse_formatting=True
 
         return new_str
 
+    def formatEmoji(message):
+        return re.sub(r"<(:\w+:)\d+>", lambda m: m.group(1), message)
+
+    async def formatCodeblocks(message, original_message):
+        for match in re.finditer(r"```(?:\w+\n|\n)?(.+?)```", original_message, flags=re.S):
+            code = match.group(1).strip("\n")
+            if code.count("\n") > 0:
+                dump_link = await createTextDump(code)
+                return message.replace(match.group(0), dump_link)
+            else:
+                return message.replace(match.group(0), f"\x11{code}\x11")
+        return message
+    
+    def formatNewlines(message):
+        if "\n" in message:
+            message = message.replace("\n", " ")
+        return message
+
     async def createTermbin(text):
         reader, writer = await asyncio.wait_for(asyncio.open_connection("termbin.com", 9999), timeout=5)
         writer.write(text.encode())
@@ -89,6 +107,15 @@ async def discordToIrc(message, author, author_avatar_url, parse_formatting=True
                 return response.read().decode()
         else:
             raise MalformedConfig(f"The url shortener service '{url_shortener_config['service']}' is not supported")
+    
+    def getPreview(message, num_bytes):
+        preview = bytearray()
+        for char in message:
+            char_bytes = bytes(char, "utf8")
+            if len(preview) + len(char_bytes) < num_bytes:
+                preview += char_bytes
+            else:
+                return str(preview, "utf8")
 
     formatting_table = [    #comment lines of this table to disable certain types of formatting relay
         ("***__",   "\x02\x1D\x1F"),    # ***__UNDERLINE BOLD ITALICS__***
@@ -111,42 +138,49 @@ async def discordToIrc(message, author, author_avatar_url, parse_formatting=True
     # if we have codeblocks and a shortener available, just try to throw the message into discohook
     if url_shortener_config is not None and re.search(r"```(.+?)```", message, flags=re.S) is not None:
         try:
-            return await createDiscohookUrl(message, author, author_avatar_url, url_shortener_config)
+            discohook_url = await createDiscohookUrl(message, author, author_avatar_url, url_shortener_config)
+            precode_message = message.split("```")[0]
+            precode_message = formatNewlines(precode_message)
+            if parse_formatting:
+                for form in formatting_table:
+                    replaceFormatting(form[0], form[1], precode_message)
+            precode_message = formatEmoji(precode_message)
+            if len(bytes(precode_message, "utf8")) > 350:
+                preview = getPreview(precode_message, 350)
+            else:
+                preview = precode_message
+            return f"{preview}\x0F... {discohook_url}"
         except (httpx.HTTPError, MalformedConfig) as error:
             traceback.print_exc()
 
+    formatted_message = message
+
     #replace codeblocks
-    for match in re.finditer(r"```(?:\w+\n|\n)?(.+?)```", message, flags=re.S):
-        code = match.group(1).strip("\n")
-        if code.count("\n") > 0:
-            dump_link = await createTextDump(code)
-            message = message.replace(match.group(0), dump_link)
-        else:
-            message = message.replace(match.group(0), f"\x11{code}\x11")
+    formatted_message = await formatCodeblocks(formatted_message, message)
 
     #replace newlines
-    if "\n" in message:
-        message = message.replace("\n", " ")
+    formatted_message = formatNewlines(formatted_message)
 
     #replace formatting
     if parse_formatting:
         for form in formatting_table:
-            message = replaceFormatting(form[0], form[1], message)
+            formatted_message = replaceFormatting(form[0], form[1], formatted_message)
 
     #clean up emotes
-    message = re.sub(r"<(:\w+:)\d+>", lambda m: m.group(1), message)
+    formatted_message = formatEmoji(formatted_message)
 
     # check message length and truncate + hastebin if needed
-    if len(message) > 400:  # max length is 512, so lets leave 112 bytes for the preamble
+    if len(bytes(formatted_message, "utf8")) > 350:  # max length is 512, so lets leave 112 bytes for the preamble
         # can improve this later by estimating the message length from server -> client (eg. https://github.com/RenolY2/Renol-IRC/blob/8a906402e08e9ae6cce02b61ba728d14b31b578b/commandHandler.py#L123-L141)
         if url_shortener_config is not None:
             try:
-                return await createDiscohookUrl(message, author, author_avatar_url, url_shortener_config)
+                discohook_url = await createDiscohookUrl(message, author, author_avatar_url, url_shortener_config)
+                return f"{getPreview(formatted_message, 350)}\x0F... {discohook_url}"
             except (httpx.HTTPError, MalformedConfig) as error:
                 traceback.print_exc()
-        message = message[:350] + "\x0F... {}".format(await createTextDump(message))
+        formatted_message = f"{getPreview(formatted_message, 350)}\x0F... {await createTextDump(message)}"
 
-    return message
+    return formatted_message
 
 async def ircToDiscord(message, discord_channel_id, discord_client, parse_formatting=True):
     message = re.sub(r"\x03\d{0,2}(?:,\d{0,2})?", "", message)
