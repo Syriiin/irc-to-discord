@@ -87,7 +87,7 @@ async def discordToIrc(message, author, author_avatar_url, parse_formatting=True
                 }
             ]
         }
-        base64_string = base64.urlsafe_b64encode(json.dumps(discohook_data, ensure_ascii=False).encode()).decode()
+        base64_string = base64.urlsafe_b64encode(json.dumps(discohook_data, ensure_ascii=False, separators=(",", ":")).encode()).decode()
         discohook_url = f"https://discohook.org/viewer?data={base64_string}"
         
         if "service" not in url_shortener_config:
