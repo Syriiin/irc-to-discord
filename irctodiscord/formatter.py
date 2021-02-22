@@ -5,11 +5,12 @@ import json
 import asyncio
 import base64
 import traceback
+from datetime import timezone
 
 class MalformedConfig(Exception):
     pass
 
-async def discordToIrc(message, author, author_avatar_url, parse_formatting=True, url_shortener_config=None):
+async def discordToIrc(message, author, author_avatar_url, message_timestamp, parse_formatting=True, url_shortener_config=None):
     def replaceFormatting(form, replacement, string):
         start_form = re.escape(form)
         end_form = re.escape(form[::-1])    # reverse it
@@ -74,7 +75,7 @@ async def discordToIrc(message, author, author_avatar_url, parse_formatting=True
             except asyncio.TimeoutError:
                 return "<Error creating text dump>"
 
-    async def createDiscohookUrl(message, author, author_avatar_url, url_shortener_config):
+    async def createDiscohookUrl(message, author, author_avatar_url, message_timestamp, url_shortener_config):
         discohook_data = {
             "messages": [
                 {
@@ -83,7 +84,8 @@ async def discordToIrc(message, author, author_avatar_url, parse_formatting=True
                         "username": author,
                         "avatar_url": author_avatar_url
                     },
-                    "badge": None
+                    "badge": None,
+                    "timestamp": message_timestamp.replace(tzinfo=timezone.utc).isoformat()
                 }
             ]
         }
@@ -138,7 +140,7 @@ async def discordToIrc(message, author, author_avatar_url, parse_formatting=True
     # if we have codeblocks and a shortener available, just try to throw the message into discohook
     if url_shortener_config is not None and re.search(r"```(.+?)```", message, flags=re.S) is not None:
         try:
-            discohook_url = await createDiscohookUrl(message, author, author_avatar_url, url_shortener_config)
+            discohook_url = await createDiscohookUrl(message, author, author_avatar_url, message_timestamp, url_shortener_config)
             precode_message = message.split("```")[0]
             precode_message = formatNewlines(precode_message)
             if parse_formatting:
@@ -174,7 +176,7 @@ async def discordToIrc(message, author, author_avatar_url, parse_formatting=True
         # can improve this later by estimating the message length from server -> client (eg. https://github.com/RenolY2/Renol-IRC/blob/8a906402e08e9ae6cce02b61ba728d14b31b578b/commandHandler.py#L123-L141)
         if url_shortener_config is not None:
             try:
-                discohook_url = await createDiscohookUrl(message, author, author_avatar_url, url_shortener_config)
+                discohook_url = await createDiscohookUrl(message, author, author_avatar_url, message_timestamp, url_shortener_config)
                 return f"{getPreview(formatted_message, 350)}\x0F... {discohook_url}"
             except (httpx.HTTPError, MalformedConfig) as error:
                 traceback.print_exc()
