@@ -58,6 +58,7 @@ class Bridge(discord.Client):
 
         # Get name of user being replied to (if any)
         reply_name = None
+        is_discord_reply = False
         if message.reference and message.type == discord.MessageType.default:
             replied_message = None
             if message.reference.cached_message:
@@ -72,6 +73,7 @@ class Bridge(discord.Client):
                     if match:
                         reply_name = match.group(1)
                 else:
+                    is_discord_reply = True
                     try:
                         reply_name = replied_message.author.nick or replied_message.author.name
                     except AttributeError:
@@ -88,7 +90,7 @@ class Bridge(discord.Client):
             elif message.type != discord.MessageType.default:
                 header = f"\x0314SYSTEM\x03: "
             elif reply_name is not None:
-                header = f"<{format_name(author)} \u2192 {format_name(reply_name, False)}> "
+                header = f"<{format_name(author)} \u2192 {format_name(reply_name, is_discord_reply)}> "
             else:
                 header = f"<{format_name(author)}> "
 
