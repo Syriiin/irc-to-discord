@@ -34,7 +34,7 @@ async def discordToIrc(message, author, author_avatar_url, message_timestamp, pa
         return new_str
 
     def formatEmoji(message):
-        return re.sub(r"<(:\w+:)\d+>", lambda m: m.group(1), message)
+        return re.sub(r"<a?(:\w+:)\d+>", lambda m: m.group(1), message)
 
     async def formatCodeblocks(message, original_message):
         for match in re.finditer(r"```(?:\w+\n|\n)?(.+?)```", original_message, flags=re.S):
